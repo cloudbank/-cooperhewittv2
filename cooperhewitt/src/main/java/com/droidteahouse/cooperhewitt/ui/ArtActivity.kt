@@ -133,7 +133,6 @@ class ArtActivity : DaggerAppCompatActivity() {
     @NonNull
     override fun getPreloadItems(position: Int): List<ArtObject> {
       //    Log.d("MyPreloadModelProvider", "getPreloadItems" + objects.size)
-      //could take the objects array into bg here  1.
       if (objects.isEmpty() || position >= objects.size) {
         return emptyList()
       } else {
@@ -141,31 +140,21 @@ class ArtActivity : DaggerAppCompatActivity() {
       }
     }
 
-
-    //either do whole list w preload in activity or one by one w preloadRequestBuilder--try both
-//extra method to hash page of images, update pagedlist and db
     @Override
     @Nullable
     //
     //@todo@WorkerThread  and generalize the type here for item
     override fun hashImage(requestBuilder: RequestBuilder<Any>, item: ArtObject, position: Int) {
-      //will from cache after loading in repository; inject glide
       // if ((item.id.equals("18731719") || item.id.equals("18731721")) || item.id.equals("18731723")) {
       //can we bulk update
       //@todo try with first 3 images
-      //if has hash, exists in cache ,mem/disk make list of ids
 
       ioExecutor.execute {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
-
         val bmd = requestBuilder.submit(9, 8).get() as BitmapDrawable
-
         val b = bmd.bitmap
         val pix = IntArray(72)
         b.getPixels(pix, 0, 9, 0, 0, 9, 8)
-
-
-        //item.hash = bitmap.hashCode().toString();  //collisions, weak hash? need boost?
         val bmpGrayscale = Bitmap.createBitmap(9, 8, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmpGrayscale)
         val paint = Paint()
@@ -174,35 +163,16 @@ class ArtActivity : DaggerAppCompatActivity() {
         val f = ColorMatrixColorFilter(cm)
         paint.colorFilter = f
         c.drawBitmap(b, 0.0f, 0.0f, paint)
-
-        //val buffer1 = java.nio.ByteBuffer.allocate(bmpGrayscale!!.getHeight() * bmpGrayscale!!.getRowBytes())
-
-        // bmpGrayscale?.copyPixelsToBuffer(buffer1)
-        //val bytes = buffer1.array()
         bmpGrayscale.getPixels(pix, 0, 9, 0, 0, 9, 8)
         item.hash = dhash(pix)
         //this is the first chance to get the cached image but also, happens with scroll
-        //delete onchange may not be fast enough--try to update pagedlist manually
-        //dhash(pix))
         Log.d("MyPreloadModelProvider", "hashImages" + item.id + " :: " + dhash(pix))
-
-
         try {
-
-          //check the memory/disk cache for within delta
-          //override equals somewhere like in cache?
-          //v ^v2.bitCount
-          //@TODO need bg thread
           artViewModel.update(item)
-          //android.database.sqlite.SQLiteConstraintException
-        } catch (e: Exception) {
+        } catch (e: Exception) {//android.database.sqlite.SQLiteConstraintException
           Log.d("MyPreloadModelProvider", "hashImages found duplicate" + item.id + e)
-          //remove from PagedList
-          //preloadModelProvider.getPreloadItems().remove()
-          // adapter.notifyItemRemoved(position);--this might be too risky & dynamic
-
+          //datasource updates the pagedlist in time for now
           artViewModel.delete(item)
-
         }
       }
 
@@ -235,7 +205,6 @@ class ArtActivity : DaggerAppCompatActivity() {
     @Override
     @Nullable
     override fun getPreloadRequestBuilder(art: ArtObject): GlideRequest<Drawable> {
-      //will from cache after loading in repository; inject glide
       //Log.d("MyPreloadModelProvider", "getPreloadRequestBuilder")
       return GlideApp.with(context).load(art.imageUrl).centerCrop()
     }
