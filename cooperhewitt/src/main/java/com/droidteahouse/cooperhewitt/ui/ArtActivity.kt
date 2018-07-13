@@ -34,7 +34,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import com.bumptech.glide.RequestBuilder
 import com.droidteahouse.cooperhewitt.*
 import com.droidteahouse.cooperhewitt.repository.NetworkState
@@ -63,7 +62,6 @@ class ArtActivity : DaggerAppCompatActivity() {
   private var mLayoutManager: LinearLayoutManager? = null
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Toast.makeText(this, stringFromJNI() + "::", Toast.LENGTH_LONG).show()
     setContentView(R.layout.activity_art)
     createViews()
     initSwipeToRefresh()
