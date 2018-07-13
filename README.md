@@ -1,10 +1,13 @@
 # cooperhewitt
 CH API for Architecture optimizations in image downloads and paging
 
-## Japanese Design @ Cooper Hewitt v1    (POC demo portfolio app)
+## with duplicate detection at preload
+
+
+## Japanese Design @ Cooper Hewitt v2    (POC demo portfolio app)
 >>>>
 
-<img src="https://i.imgur.com/rh7MkgQ.png" height="300"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img src="https://i.imgur.com/ppMS70j.png" height="300"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 >>>>Target 27
 >>>>SDK 14+, Oreo compatible, for phone and tablet
 
@@ -14,13 +17,13 @@ CH API for Architecture optimizations in image downloads and paging
 * MVVM, Repository, DAO patterns with LiveData for lifecycle managment
 * Glide RecyclerView integration library for image preload
 * Kotlin extensions
-* Image duplicates removal coming soon in v2
+* Image duplicates removal built in at preload
 
 
 
 >>>>VIEW   
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.imgur.com/Pb4MURQ.png" height="300"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="https://i.imgur.com/2m3uBaq.png" height="300" />     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.imgur.com/7xNYULo.png" height="300"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 
 
 ### Designed with the Material theme and latest, greatest android libs for best viewing pleasure!
