@@ -157,8 +157,6 @@ public class ListPreloaderHasher<T> implements AbsListView.OnScrollListener {
 
 
     final ArtObject artObject = (ArtObject) item;
-    //  Log.d("HASHER", "about to hash " + ((ArtObject) item).getId() +"::"+ ((ArtObject) item).getHash());
-    //if (artObject.getHash() == (Integer.valueOf(artObject.getId()))) {
 
 
     if (preloadRequestBuilder == null) {
@@ -176,7 +174,7 @@ public class ListPreloaderHasher<T> implements AbsListView.OnScrollListener {
 
     });
     */
-    //need a monitor lock or something to really gate this off
+    //  Log.d("HASHER", "about to hash " + ((ArtObject) item).getId() +"::"+ ((ArtObject) item).getHash());
     if (artObject.getHash() == (Integer.valueOf(artObject.getId()))) {
       artObject.setHash(Integer.reverse(Integer.valueOf(artObject.getId())));
       preloadModelProvider.hashImage(preloadRequestBuilder, (ArtObject) item);
