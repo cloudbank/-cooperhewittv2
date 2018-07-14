@@ -24,6 +24,7 @@ import android.support.annotation.MainThread
 import android.util.Log
 import com.droidteahouse.cooperhewitt.db.ArtDb
 import com.droidteahouse.cooperhewitt.vo.ArtObject
+import com.droidteahouse.cooperhewitt.vo.ImageHash
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -148,13 +149,24 @@ class ArtObjectRepository @Inject constructor(
     return listing
   }
 
-  fun update(item: ArtObject) {
-    db.artDao().update(item)
+  fun insertHash(item: ImageHash) {
+    db.artDao().insertHash(item)
 
   }
 
+  fun getHash(item: String): Int {
+    return db.artDao().getHash(item)
+
+  }
+
+
   fun delete(item: ArtObject) {
     db.artDao().delete(item)
+  }
+
+  fun update(item: ArtObject) {
+    db.artDao().update(item)
+
   }
 }
 

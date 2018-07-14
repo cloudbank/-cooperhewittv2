@@ -17,21 +17,18 @@
 package com.droidteahouse.cooperhewitt.ui
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.arch.paging.PagedList
-import android.arch.paging.PagedListAdapter
 import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.annotation.NonNull
-import android.support.annotation.Nullable
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import com.bumptech.glide.RequestBuilder
@@ -81,19 +78,21 @@ class ArtActivity : DaggerAppCompatActivity() {
     //@todo rv opts
     rvArt.adapter = adapter
     configRV()
-
+    val modelProvider = ArtActivity.MyPreloadModelProvider(this, artViewModel, ioExecutor)
+    val sizeProvider = FixedPreloadSizeProvider<ArtObject>(65, 65)//@todo seems better than async cb????
+    val preloader = RecyclerViewPreloader(
+        glide, modelProvider, sizeProvider, 10)
+    rvArt?.addOnScrollListener(preloader)
     artViewModel.artObjects.observe(this, Observer<PagedList<ArtObject>> {
       // if (it?.size!! > 0) {  //into STARTED w out data  bugfix idea for STARTED && list.size > 0
-      //@todo keep above check
-      val modelProvider = ArtActivity.MyPreloadModelProvider(this, it.orEmpty(), artViewModel, adapter, ioExecutor)
-      val sizeProvider = FixedPreloadSizeProvider<ArtObject>(65, 65)//@todo seems better than async cb????
-      val preloader = RecyclerViewPreloader(
-          glide, modelProvider, sizeProvider, 10)
-      rvArt?.addOnScrollListener(preloader)
+      //@todo //might want to avoid this for delete updates
+      //do we need to have these here or can we get away without to debug
+      modelProvider.objects = it?.toMutableList()
 
       adapter.submitList(it)
       // }
     })
+
     artViewModel.networkState.observe(this, Observer
     {
       adapter.setNetworkState(it)
@@ -124,29 +123,35 @@ class ArtActivity : DaggerAppCompatActivity() {
 
   //setOnFlingListener
 
-  class MyPreloadModelProvider(val context: Context, val objects: List<ArtObject>, val artViewModel: ArtViewModel, val adapter: PagedListAdapter<ArtObject, RecyclerView.ViewHolder>, val ioExecutor: Executor) : ListPreloaderHasher.PreloadModelProvider<ArtObject> {
+  class MyPreloadModelProvider(val context: Context, val artViewModel: ArtViewModel, val ioExecutor: Executor) : ListPreloaderHasher.PreloadModelProvider<ArtObject> {
+
+    //set objects
+    var objects: MutableList<ArtObject>? = mutableListOf()
 
 
-    @Override
-    @NonNull
-    override fun getPreloadItems(position: Int): List<ArtObject> {
-      //    Log.d("MyPreloadModelProvider", "getPreloadItems" + objects.size)
-      if (objects.isEmpty() || position >= objects.size) {
-        return emptyList()
+    override fun getExecutor(): Executor {
+      return ioExecutor
+    }
+
+    override fun getViewModel(): ViewModel {
+      return artViewModel
+    }
+
+    override fun getPreloadItems(position: Int): MutableList<ArtObject> {
+      Log.d("MyPreloadModelProvider", "getPreloadItems" + objects?.size)
+      if (objects?.isEmpty()!! || position >= objects?.size!!) {
+        return mutableListOf()
       } else {
-        return Collections.singletonList(objects.get(position))
+        return Collections.singletonList(objects?.get(position))
       }
     }
 
-    @Override
-    @Nullable
     //
     //@todo@WorkerThread  and generalize the type here for item
-    override fun hashImage(requestBuilder: RequestBuilder<Any>, item: ArtObject, position: Int) {
+    override fun hashImage(requestBuilder: RequestBuilder<Any>, item: ArtObject) {
       // if ((item.id.equals("18731719") || item.id.equals("18731721")) || item.id.equals("18731723")) {
       //can we bulk update
       //@todo try with first 3 images
-
       ioExecutor.execute {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
         val bmd = requestBuilder.submit(9, 8).get() as BitmapDrawable
@@ -167,14 +172,17 @@ class ArtActivity : DaggerAppCompatActivity() {
         Log.d("MyPreloadModelProvider", "hashImages" + item.id + " :: " + dhash(pix))
         try {
           artViewModel.update(item)
-        } catch (e: Exception) {//android.database.sqlite.SQLiteConstraintException
+          //new table for hashes and ids
+          // artViewModel.insertHash(ImageHash(item.id, hash))  // dont update the pagedlist again and aagin
+          //catch (e: Exception) {//android.database.sqlite.SQLiteConstraintException
+        } catch (e: Exception) {
           Log.d("MyPreloadModelProvider", "hashImages found duplicate" + item.id + e)
           //datasource updates the pagedlist in time for now
           artViewModel.delete(item)
         }
       }
 
-      // }
+
     }
     //does a row hash only instead of row | col hash.  32 bits is plenty for 3K images not to collide
     //and it is faster for Android needs....will it give false positives
@@ -200,8 +208,6 @@ class ArtActivity : DaggerAppCompatActivity() {
     inline fun Int.asColorUInt() = this and 0xff
 
 
-    @Override
-    @Nullable
     override fun getPreloadRequestBuilder(art: ArtObject): GlideRequest<Drawable> {
       //Log.d("MyPreloadModelProvider", "getPreloadRequestBuilder")
       return GlideApp.with(context).load(art.imageUrl).centerCrop()

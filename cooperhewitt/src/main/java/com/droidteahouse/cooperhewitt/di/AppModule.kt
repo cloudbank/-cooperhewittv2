@@ -70,7 +70,7 @@ class AppModule {
   @Singleton
   @Provides
   internal fun provideDb(application: Application): ArtDb {
-    return Room.databaseBuilder(application, ArtDb::class.java, "art.db").build()
+    return Room.databaseBuilder(application, ArtDb::class.java, "art.db").fallbackToDestructiveMigration().build()
   }
 
   //https://stackoverflow.com/questions/16316890/when-to-shutdown-executorservice-in-android-application

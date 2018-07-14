@@ -136,12 +136,12 @@ class ArtBoundaryCallback @Inject constructor(
     val start = System.currentTimeMillis()
 
 
-    val executor = Executors.newFixedThreadPool(10);
+    val ioExecutor = Executors.newFixedThreadPool(10);
 
     // Submit and execute 100 threads!
     for (o in objects!!) {
        var i=1
-      executor.execute(object : Runnable {
+      ioExecutor.execute(object : Runnable {
         public override fun run() {
           System.out.println("thread..." );
           //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -173,11 +173,11 @@ class ArtBoundaryCallback @Inject constructor(
 
     System.out.println("Waiting...");
 
-    // No more threads can be submitted to the executor service!
-    executor.shutdown();
+    // No more threads can be submitted to the ioExecutor service!
+    ioExecutor.shutdown();
 
     // Blocks until all 100 submitted threads have finished!
-    executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+    ioExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
 
     System.out.println("Done" + objects +"  :  " +System.currentTimeMillis().minus(start));
     return  objects

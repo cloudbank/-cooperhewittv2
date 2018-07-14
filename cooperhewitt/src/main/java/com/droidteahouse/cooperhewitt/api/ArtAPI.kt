@@ -27,7 +27,7 @@ import retrofit2.http.Query
 
 
 interface ArtAPI {
-  @GET("https://api.collection.cooperhewitt.org/rest/?method=cooperhewitt.search.collection&access_token=9ce849a62b794a952b54dd6392f2dba6&query=japan%2Bjapanese%2Bkyoto%2Bnagoya&sort=relevance&sort_order=desc&has_images=1&per_page=10")
+  @GET("?method=cooperhewitt.search.collection&access_token=9ce849a62b794a952b54dd6392f2dba6&query=japan%2Bjapanese%2Bkyoto%2Bnagoya&sort=relevance&sort_order=desc&has_images=1&per_page=10")
   fun japaneseDesign(
       @Query("page") page: String): Call<com.droidteahouse.cooperhewitt.vo.ArtObjects>
 

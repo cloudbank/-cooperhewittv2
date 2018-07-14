@@ -19,6 +19,7 @@ package com.droidteahouse.cooperhewitt.db
 import android.arch.paging.DataSource
 import android.arch.persistence.room.*
 import com.droidteahouse.cooperhewitt.vo.ArtObject
+import com.droidteahouse.cooperhewitt.vo.ImageHash
 
 @Dao
 interface ArtDao {
@@ -37,6 +38,14 @@ interface ArtDao {
 
   @Delete
   fun delete(item: ArtObject)
+
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  fun insertHash(hashItem: ImageHash)
+
+  @Query("SELECT hash FROM imageHashes WHERE id = :id")
+  fun getHash(id: String): Int
+
 
 
 }

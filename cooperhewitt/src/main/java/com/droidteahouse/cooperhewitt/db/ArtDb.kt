@@ -20,13 +20,14 @@ import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
 import android.arch.persistence.room.TypeConverters
 import com.droidteahouse.cooperhewitt.vo.ArtObject
+import com.droidteahouse.cooperhewitt.vo.ImageHash
 
 
 /**
  * Database schema used by the DbCHObjectRepository
  */
 @Database(
-    entities = arrayOf(ArtObject::class),
+    entities = arrayOf(ArtObject::class, ImageHash::class),
     version = 1,
     exportSchema = false
 )

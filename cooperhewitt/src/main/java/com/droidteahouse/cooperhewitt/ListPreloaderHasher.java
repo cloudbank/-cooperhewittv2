@@ -1,6 +1,7 @@
 package com.droidteahouse.cooperhewitt;
 
 
+import android.arch.lifecycle.ViewModel;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import com.droidteahouse.cooperhewitt.vo.ArtObject;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 
 /**
  * Loads a few resources ahead in the direction of scrolling in any {@link AbsListView} so that
@@ -46,6 +48,7 @@ public class ListPreloaderHasher<T> implements AbsListView.OnScrollListener {
   private int lastFirstVisible = -1;
   private int totalItemCount;
   private boolean isIncreasing = true;
+
 
   /**
    * Constructor for {@link ListPreloaderHasher} that accepts interfaces for providing
@@ -148,18 +151,35 @@ public class ListPreloaderHasher<T> implements AbsListView.OnScrollListener {
     if (dimensions == null) {
       return;
     }
-    RequestBuilder<Object> preloadRequestBuilder =
+    final RequestBuilder<Object> preloadRequestBuilder =
         (RequestBuilder<Object>) preloadModelProvider.getPreloadRequestBuilder(item);
 //here
 
-    //must add cache mem/disk for checking if already got this
-    ArtObject artObject = (ArtObject) item;
+
+    final ArtObject artObject = (ArtObject) item;
     //  Log.d("HASHER", "about to hash " + ((ArtObject) item).getId() +"::"+ ((ArtObject) item).getHash());
-    if (artObject.getHash() == (Integer.valueOf(artObject.getId()))) {
-      preloadModelProvider.hashImage(preloadRequestBuilder, (ArtObject) item, position);
-    }
+    //if (artObject.getHash() == (Integer.valueOf(artObject.getId()))) {
+
+
     if (preloadRequestBuilder == null) {
       return;
+    }
+  /* preloadModelProvider.getExecutor().execute(new Runnable() {
+      @Override
+      public void run() {
+        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+        if (((ArtViewModel) preloadModelProvider.getViewModel()).getHash(artObject.getId()) == 0) {
+          preloadModelProvider.hashImage(preloadRequestBuilder, (ArtObject) artObject);
+        }
+      }
+
+    });
+    */
+    //need a monitor lock or something to really gate this off
+    if (artObject.getHash() == (Integer.valueOf(artObject.getId()))) {
+      artObject.setHash(Integer.reverse(Integer.valueOf(artObject.getId())));
+      preloadModelProvider.hashImage(preloadRequestBuilder, (ArtObject) item);
     }
     //is there an actual bitmap loaded here
     preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
@@ -182,9 +202,14 @@ public class ListPreloaderHasher<T> implements AbsListView.OnScrollListener {
    */
   public interface PreloadModelProvider<U> {
 
+    @NonNull
+    Executor getExecutor();
+
+    @NonNull
+    ViewModel getViewModel();
 
     @Nullable
-    void hashImage(RequestBuilder<Object> requestBuilder, ArtObject item, int position);
+    void hashImage(RequestBuilder<Object> requestBuilder, ArtObject item);
 
     /**
      * Returns a {@link List} of models that need to be loaded for the list to display adapter items

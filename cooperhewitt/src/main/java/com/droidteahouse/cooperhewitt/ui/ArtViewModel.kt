@@ -19,6 +19,7 @@ package com.droidteahouse.cooperhewitt.ui
 import android.arch.lifecycle.ViewModel
 import com.droidteahouse.cooperhewitt.repository.ArtObjectRepository
 import com.droidteahouse.cooperhewitt.vo.ArtObject
+import com.droidteahouse.cooperhewitt.vo.ImageHash
 import javax.inject.Inject
 
 /**
@@ -48,6 +49,18 @@ class ArtViewModel @Inject constructor(
   fun update(item: ArtObject) {
     repository.update(item)
 
+
+  }
+
+  fun insertHash(item: ImageHash) {
+    repository.insertHash(item)
+
+
+  }
+
+
+  fun getHash(item: String): Int {
+    return repository.getHash(item)
 
   }
 
